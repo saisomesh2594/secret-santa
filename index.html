@@ -4,38 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Secret Santa draw</title>
+<meta name="description" content="Draw Secret Santa matches for your group and send each person only their own.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%8E%81%3C/text%3E%3C/svg%3E">
 <style>
   :root {
-    --paper: #F1F5F4;
+    --paper: #EDF3F2;
     --card: #FFFFFF;
-    --ink: #16231F;
-    --muted: #5A6A65;
-    --line: #CFDAD6;
-    --spruce: #1E4B40;
-    --gold: #D4A24A;
-    --primary: #B02A44;
+    --ink: #12261E;
+    --muted: #4F625B;
+    --line: #C4D4CE;
+    --spruce: #165B33;
+    --gold: #E0A82E;
+    --primary: #C1121F;
     --primary-ink: #FFFFFF;
     --field: #FFFFFF;
-    --ok: #1E6B4F;
-    --bad: #A3212F;
-    --tag-shadow: rgba(22, 35, 31, .12);
+    --ok: #14663B;
+    --bad: #B3141F;
+    --snow: rgba(255, 255, 255, .95);
+    --stripe: #FFFFFF;
+    --tag-shadow: rgba(18, 38, 30, .16);
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #0F1A17;
-      --card: #172722;
-      --ink: #E8EFEC;
-      --muted: #9DB0A9;
-      --line: #2B3E38;
-      --spruce: #7CC4AE;
-      --gold: #E0B25C;
-      --primary: #E8708A;
-      --primary-ink: #2A0A12;
-      --field: #0F1A17;
-      --ok: #7FD1A9;
-      --bad: #FF8E9A;
-      --tag-shadow: rgba(0, 0, 0, .4);
+      --paper: #0B1912;
+      --card: #14291F;
+      --ink: #F1F5F2;
+      --muted: #A9BDB3;
+      --line: #28463A;
+      --spruce: #6FD39A;
+      --gold: #F2C14E;
+      --primary: #FF6B78;
+      --primary-ink: #3A0710;
+      --field: #0B1912;
+      --ok: #7FE0A6;
+      --bad: #FF9AA3;
+      --snow: rgba(255, 255, 255, .13);
+      --stripe: #E8DEDA;
+      --tag-shadow: rgba(0, 0, 0, .5);
       color-scheme: dark;
     }
   }
@@ -44,20 +50,31 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    background: var(--paper);
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(circle, var(--snow) 1.6px, transparent 2.2px),
+      radial-gradient(circle, var(--snow) 1.1px, transparent 1.7px);
+    background-size: 110px 110px, 70px 70px;
+    background-position: 0 0, 38px 46px;
     color: var(--ink);
     font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  body::before {
+    content: "";
+    position: fixed; top: 0; left: 0; right: 0; height: 10px; z-index: 10;
+    background: repeating-linear-gradient(-45deg, var(--primary) 0 10px, var(--stripe) 10px 20px);
+    box-shadow: 0 1px 3px var(--tag-shadow);
   }
 
   .page { max-width: 720px; margin: 0 auto; padding: 56px 22px 96px; }
 
-  header { position: relative; padding-left: 26px; margin-bottom: 44px; }
+  header { position: relative; padding-left: 26px; margin-bottom: 40px; }
   header::before {
     content: "";
-    position: absolute; left: 0; top: 6px; bottom: 6px; width: 8px;
-    background: var(--gold);
-    border-radius: 2px;
-    box-shadow: 12px 0 0 -3px var(--primary);
+    position: absolute; left: 0; top: 6px; bottom: 6px; width: 12px;
+    border-radius: 6px;
+    background: repeating-linear-gradient(-45deg, var(--primary) 0 8px, var(--stripe) 8px 16px);
+    box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--line);
   }
   h1 {
     font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -67,19 +84,23 @@
     letter-spacing: -0.02em;
     margin: 0 0 14px;
   }
+  h1 .red { color: var(--primary); }
+  h1::after {
+    content: "★"; color: var(--gold);
+    font-size: .42em; vertical-align: 1.35em; margin-left: .3em;
+  }
   .lede { color: var(--muted); max-width: 52ch; margin: 0; }
 
-  section { margin-top: 44px; }
+  section { margin-top: 40px; }
   h2 {
     font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em;
+    font-size: 1.5rem; margin: 0 0 14px; letter-spacing: -0.01em;
     display: flex; align-items: baseline; gap: 12px;
   }
   h2 .n { color: var(--primary); font-style: italic; min-width: 1ch; }
-  .hint { color: var(--muted); margin: 0 0 14px; font-size: .95rem; max-width: 62ch; }
 
   label { display: block; font-weight: 600; font-size: .92rem; margin: 0 0 6px; }
-  textarea, input[type=text], input[type=email], input[type=password] {
+  textarea, input[type=text], input[type=email] {
     width: 100%;
     font: inherit;
     color: var(--ink);
@@ -93,7 +114,7 @@
   textarea::placeholder, input::placeholder { color: var(--muted); opacity: .8; }
   :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid .full { grid-column: 1 / -1; }
   @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 
@@ -141,18 +162,6 @@
     white-space: pre-wrap; font: inherit; font-size: .95rem;
   }
 
-  ol.guide { padding-left: 20px; margin: 0 0 8px; }
-  ol.guide li { margin: 0 0 12px; max-width: 62ch; }
-  .copyline {
-    display: flex; gap: 8px; align-items: center; margin: 6px 0 0;
-  }
-  .copyline code {
-    flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap;
-    background: var(--card); border: 1px solid var(--line); border-radius: 6px;
-    padding: 5px 9px; font-size: .85rem;
-  }
-  .copyline .lbl { font-size: .85rem; color: var(--muted); min-width: 86px; }
-
   /* Results */
   #results { margin-top: 44px; }
   .shuffle {
@@ -160,7 +169,7 @@
     min-height: 2.2rem; color: var(--primary);
   }
   .banner {
-    border-left: 4px solid var(--gold); background: var(--card);
+    border-left: 4px solid var(--primary); background: var(--card);
     padding: 12px 16px; margin: 0 0 20px; border-radius: 0 6px 6px 0;
   }
   .banner strong { font-family: "Iowan Old Style", Georgia, serif; font-size: 1.15rem; }
@@ -174,7 +183,9 @@
     filter: drop-shadow(0 2px 3px var(--tag-shadow));
     border-radius: 0 6px 6px 0;
     display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center;
+    border-bottom: 4px solid var(--primary);
   }
+  li.tag:nth-child(even) { border-bottom-color: var(--spruce); }
   li.tag::before {
     content: ""; position: absolute; left: 24px; top: 50%; width: 11px; height: 11px;
     margin-top: -5.5px; border-radius: 50%;
@@ -197,43 +208,38 @@
   }
 
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  footer { margin-top: 56px; color: var(--muted); font-size: .88rem; max-width: 62ch; }
 </style>
 </head>
 <body>
 <div class="page">
 
   <header>
-    <h1>Secret Santa draw</h1>
-    <p class="lede">Add your group, draw once, and send each person only their own match. Everything runs in this page. Nothing leaves it unless you choose automatic email sending.</p>
+    <h1>Secret <span class="red">Santa</span> draw</h1>
+    <p class="lede">Everyone gives to one person and receives from another. Nobody draws themselves.</p>
   </header>
 
   <section aria-labelledby="h-people">
     <h2 id="h-people"><span class="n">1</span> Who’s in</h2>
-    <p class="hint">Type or paste one person per line (name, then email), or load a CSV file. Commas, tabs, semicolons and “Name &lt;email&gt;” all work. If your list is in Excel, save it as CSV first.</p>
-
     <label for="people">Names and emails</label>
     <textarea id="people" spellcheck="false" placeholder="Ada Lovelace, ada@example.org&#10;Grace Hopper, grace@example.org&#10;Alan Turing, alan@example.org"></textarea>
     <div id="peopleNote" class="note" aria-live="polite"></div>
 
     <div class="row tight">
-      <button type="button" class="small" id="peopleUploadBtn">Load CSV file</button>
+      <button type="button" class="small" id="peopleUploadBtn">Load CSV</button>
       <input type="file" id="peopleFile" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden>
-      <button type="button" class="link" id="peopleTemplate">Download a template</button>
-      <button type="button" class="link" id="fillExample">Fill in example names</button>
+      <button type="button" class="link" id="peopleTemplate">CSV template</button>
     </div>
     <div id="peopleFileNote" class="note" aria-live="polite"></div>
 
     <details>
-      <summary>Keep some people from drawing each other (optional)</summary>
+      <summary>Keep some people from drawing each other</summary>
       <div class="inner">
-        <p class="hint">Useful for partners or people who share a bench. One group per line, using names or emails as in the list above. Nobody in a line will get anyone else in that line, so a row can hold a whole family.</p>
-        <label for="exclusions">Pairs to keep apart</label>
+        <label for="exclusions">One group per line</label>
         <textarea id="exclusions" class="short" spellcheck="false" placeholder="Ada Lovelace, Alan Turing"></textarea>
         <div class="row tight">
-          <button type="button" class="small" id="exUploadBtn">Load CSV file</button>
+          <button type="button" class="small" id="exUploadBtn">Load CSV</button>
           <input type="file" id="exFile" accept=".csv,.tsv,.txt,text/csv,text/plain" hidden>
-          <button type="button" class="link" id="exTemplate">Download a template</button>
+          <button type="button" class="link" id="exTemplate">CSV template</button>
         </div>
         <div id="exFileNote" class="note" aria-live="polite"></div>
       </div>
@@ -241,8 +247,7 @@
   </section>
 
   <section aria-labelledby="h-details">
-    <h2 id="h-details"><span class="n">2</span> The exchange and the email</h2>
-    <p class="hint">These go into each person’s email. Leave anything blank to skip it.</p>
+    <h2 id="h-details"><span class="n">2</span> Details</h2>
     <div class="grid">
       <div>
         <label for="event">Event name</label>
@@ -254,34 +259,32 @@
       </div>
       <div class="full">
         <label for="date">Exchange date and place</label>
-        <input type="text" id="date" placeholder="e.g. Friday 19 December, group meeting room">
+        <input type="text" id="date" placeholder="e.g. Friday 19 December, meeting room">
       </div>
       <div class="full">
         <label for="extra">Extra note</label>
-        <textarea id="extra" class="short" placeholder="e.g. Wishlists welcome. Handmade gifts count."></textarea>
+        <textarea id="extra" class="short" placeholder="e.g. Wishlists welcome."></textarea>
       </div>
       <div>
-        <label for="orgName">Your name (signs the email)</label>
-        <input type="text" id="orgName" autocomplete="name" placeholder="e.g. Somesh">
+        <label for="orgName">Your name</label>
+        <input type="text" id="orgName" autocomplete="name">
       </div>
       <div>
-        <label for="orgEmail">Your email (replies go here)</label>
-        <input type="email" id="orgEmail" autocomplete="email" placeholder="you@example.org">
+        <label for="orgEmail">Your email</label>
+        <input type="email" id="orgEmail" autocomplete="email">
       </div>
     </div>
 
     <details>
-      <summary>Preview the email</summary>
+      <summary>Email preview</summary>
       <div class="inner">
         <pre class="preview" id="previewText"></pre>
-        <p class="hint" style="margin-top:8px">Sample names only. Real emails use each person’s actual match.</p>
       </div>
     </details>
   </section>
 
   <section aria-labelledby="h-draw">
     <h2 id="h-draw"><span class="n">3</span> Draw</h2>
-    <p class="hint">Everyone gives to exactly one person and receives from exactly one. Nobody draws themselves, and nobody gets a two-person swap.</p>
     <div class="row" style="margin-top:0">
       <button type="button" class="primary" id="drawBtn">Draw names</button>
     </div>
@@ -298,67 +301,22 @@
 
     <div id="tagsWrap" hidden>
       <ul class="tags" id="tags"></ul>
-
       <div class="row">
-        <button type="button" id="sendAll">Send all with EmailJS</button>
+        <button type="button" id="sendAll">Send all</button>
         <button type="button" id="showAll">Show all pairings</button>
         <button type="button" id="redraw">Draw again</button>
       </div>
       <div id="sendNote" class="note" aria-live="polite"></div>
-
-      <details id="emailjsBox">
-        <summary>Set up automatic sending (EmailJS)</summary>
-        <div class="inner">
-          <p class="hint">EmailJS sends from your own email account, so you never see who got whom. It has a free tier that is plenty for a group this size. Setup takes about five minutes.</p>
-          <ol class="guide">
-            <li>Create an account at <strong>emailjs.com</strong>. Under <strong>Email Services</strong>, add the account you want emails to come from (Gmail, Outlook and others are supported) and copy its <strong>Service ID</strong>.</li>
-            <li>Under <strong>Email Templates</strong>, create a template and fill it in exactly like this. Then copy its <strong>Template ID</strong>.
-              <div class="copyline"><span class="lbl">To email</span><code>{{to_email}}</code><button type="button" class="small" data-copy="{{to_email}}">Copy</button></div>
-              <div class="copyline"><span class="lbl">From name</span><code>{{from_name}}</code><button type="button" class="small" data-copy="{{from_name}}">Copy</button></div>
-              <div class="copyline"><span class="lbl">Reply to</span><code>{{reply_to}}</code><button type="button" class="small" data-copy="{{reply_to}}">Copy</button></div>
-              <div class="copyline"><span class="lbl">Subject</span><code>{{subject}}</code><button type="button" class="small" data-copy="{{subject}}">Copy</button></div>
-              <div class="copyline"><span class="lbl">Content</span><code>&lt;div style="white-space:pre-wrap"&gt;{{message}}&lt;/div&gt;</code><button type="button" class="small" data-copy='<div style="white-space:pre-wrap">{{message}}</div>'>Copy</button></div>
-            </li>
-            <li>Under <strong>Account → General</strong>, copy your <strong>Public Key</strong>.</li>
-            <li>Paste the three values below, send a test email to yourself, then press <strong>Send all</strong>.</li>
-          </ol>
-          <div class="grid">
-            <div>
-              <label for="ejsService">Service ID</label>
-              <input type="text" id="ejsService" autocomplete="off" placeholder="service_xxxxxxx">
-            </div>
-            <div>
-              <label for="ejsTemplate">Template ID</label>
-              <input type="text" id="ejsTemplate" autocomplete="off" placeholder="template_xxxxxxx">
-            </div>
-            <div class="full">
-              <label for="ejsKey">Public key</label>
-              <input type="text" id="ejsKey" autocomplete="off" placeholder="Account → General → Public Key">
-            </div>
-            <div class="full">
-              <label for="ejsTest">Send a test email to</label>
-              <div class="row tight" style="margin-top:0">
-                <input type="email" id="ejsTest" autocomplete="email" placeholder="you@example.org" style="flex:1; min-width:200px; width:auto">
-                <button type="button" id="ejsTestBtn">Send test</button>
-              </div>
-              <div id="testNote" class="note" aria-live="polite"></div>
-            </div>
-          </div>
-        </div>
-      </details>
     </div>
   </section>
-
-  <footer>
-    Without EmailJS, “Email draft” opens your mail app with the message filled in. That works, but you will see the pairing while you send it. “Peek” is for passing a laptop around the room.
-  </footer>
 </div>
 
 <script>
 (function () {
-  // If you host this page yourself, paste your EmailJS IDs here so you don't
-  // have to retype them. The public key is meant to be visible in web pages.
-  const EMAILJS_DEFAULTS = { service: '', template: '', key: '' };
+  // Automatic email sending (EmailJS). Leave all three empty to disable it;
+  // each person then gets an "Email draft" button that opens their mail app.
+  const EMAILJS = { service: '', template: '', key: '' };
+  const CAN_SEND = !!(EMAILJS.service && EMAILJS.template && EMAILJS.key);
 
   const $ = (id) => document.getElementById(id);
   const EMAIL_RE = /[^\s,;<>"']+@[^\s,;<>"']+\.[^\s,;<>"']+/;
@@ -370,11 +328,9 @@
   let showEverything = false;
   let busy = false;
 
-  $('ejsService').value = EMAILJS_DEFAULTS.service;
-  $('ejsTemplate').value = EMAILJS_DEFAULTS.template;
-  $('ejsKey').value = EMAILJS_DEFAULTS.key;
+  if (!CAN_SEND) $('sendAll').hidden = true;
 
-  /* ---------- small helpers ---------- */
+  /* ---------- helpers ---------- */
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
@@ -396,8 +352,7 @@
     text = text.replace(/^\uFEFF/, '');
     const firstLine = text.split(/\r?\n/).find((l) => l.trim()) || '';
     const count = (ch) => { let n = 0, q = false; for (const c of firstLine) { if (c === '"') q = !q; else if (c === ch && !q) n++; } return n; };
-    const delims = [',', ';', '\t'];
-    const delim = delims.reduce((best, d) => (count(d) > count(best) ? d : best), ',');
+    const delim = [',', ';', '\t'].reduce((best, d) => (count(d) > count(best) ? d : best), ',');
 
     const rows = [];
     let row = [], cell = '', inQ = false;
@@ -425,14 +380,13 @@
     if (!rows.length) return [];
     const head = rows[0].map((h) => h.toLowerCase());
     const idx = (re) => head.findIndex((h) => re.test(h));
-    let nameI = idx(/^(full\s*)?name$|^person$|^participant$/);
+    const nameI = idx(/^(full\s*)?name$|^person$|^participant$/);
     const firstI = idx(/^first/);
     const lastI = idx(/^(last|surname|family)/);
     const emailI = idx(/^e-?mail/);
     const hasHeader = emailI >= 0 || nameI >= 0 || firstI >= 0;
     const out = [];
-    const dataRows = hasHeader ? rows.slice(1) : rows;
-    dataRows.forEach((r) => {
+    (hasHeader ? rows.slice(1) : rows).forEach((r) => {
       let email = '', name = '';
       if (hasHeader && emailI >= 0) {
         email = r[emailI] || '';
@@ -534,7 +488,7 @@
     return null;
   }
 
-  /* ---------- live validation of the list ---------- */
+  /* ---------- live validation ---------- */
   function refreshPeopleNote() {
     const txt = $('people').value;
     if (!txt.trim()) { setNote($('peopleNote'), ''); return; }
@@ -546,17 +500,6 @@
   }
   $('people').addEventListener('input', refreshPeopleNote);
 
-  $('fillExample').addEventListener('click', () => {
-    $('people').value = [
-      'Ada Lovelace, ada@example.org',
-      'Grace Hopper, grace@example.org',
-      'Alan Turing, alan@example.org',
-      'Rosalind Franklin, rosalind@example.org',
-      'Barbara McClintock, barbara@example.org'
-    ].join('\n');
-    refreshPeopleNote();
-  });
-
   /* ---------- CSV upload and templates ---------- */
   $('peopleUploadBtn').addEventListener('click', () => $('peopleFile').click());
   $('peopleFile').addEventListener('change', async (e) => {
@@ -564,15 +507,14 @@
     if (!file) return;
     const note = $('peopleFileNote');
     try {
-      const rows = parseCSV(await file.text());
-      const list = peopleFromRows(rows);
-      if (!list.length) { setNote(note, `Couldn’t find any names or emails in ${esc(file.name)}. Expected columns called name and email.`, 'bad'); return; }
+      const list = peopleFromRows(parseCSV(await file.text()));
+      if (!list.length) { setNote(note, `Couldn’t find any names or emails in ${esc(file.name)}.`, 'bad'); return; }
       if ($('people').value.trim() && !confirm('Replace the current list with the contents of this file?')) return;
       $('people').value = list.map((p) => `${p.name}, ${p.email}`).join('\n');
       refreshPeopleNote();
-      setNote(note, `Loaded ${list.length} ${list.length === 1 ? 'row' : 'rows'} from ${esc(file.name)}. Check the list above.`, 'ok');
+      setNote(note, `Loaded ${list.length} ${list.length === 1 ? 'row' : 'rows'} from ${esc(file.name)}.`, 'ok');
     } catch (err) {
-      setNote(note, 'Couldn’t read that file. Save it as CSV (comma separated) and try again.', 'bad');
+      setNote(note, 'Couldn’t read that file. Save it as CSV and try again.', 'bad');
     } finally { e.target.value = ''; }
   });
   $('peopleTemplate').addEventListener('click', () =>
@@ -588,9 +530,9 @@
       if (!lines.length) { setNote(note, `No pairs found in ${esc(file.name)}.`, 'bad'); return; }
       if ($('exclusions').value.trim() && !confirm('Replace the current pairs with the contents of this file?')) return;
       $('exclusions').value = lines.join('\n');
-      setNote(note, `Loaded ${lines.length} ${lines.length === 1 ? 'row' : 'rows'} from ${esc(file.name)}. Names are checked when you draw.`, 'ok');
+      setNote(note, `Loaded ${lines.length} ${lines.length === 1 ? 'row' : 'rows'} from ${esc(file.name)}.`, 'ok');
     } catch (err) {
-      setNote(note, 'Couldn’t read that file. Save it as CSV (comma separated) and try again.', 'bad');
+      setNote(note, 'Couldn’t read that file. Save it as CSV and try again.', 'bad');
     } finally { e.target.value = ''; }
   });
   $('exTemplate').addEventListener('click', () =>
@@ -640,18 +582,21 @@
       peek.type = 'button'; peek.className = 'small';
       peek.textContent = peeked.has(i) ? 'Hide' : 'Peek';
       peek.addEventListener('click', () => { peeked.has(i) ? peeked.delete(i) : peeked.add(i); render(); });
+      actions.append(peek);
 
-      const draft = document.createElement('a');
-      draft.className = 'btn'; draft.textContent = 'Email draft';
-      draft.href = mailtoFor(i);
-
-      const send = document.createElement('button');
-      send.type = 'button'; send.className = 'small';
-      send.textContent = status[i] && status[i].ok ? 'Sent' : 'Send';
-      send.disabled = busy || (status[i] && status[i].ok);
-      send.addEventListener('click', () => sendOne(i, true));
-
-      actions.append(peek, draft, send);
+      if (CAN_SEND) {
+        const send = document.createElement('button');
+        send.type = 'button'; send.className = 'small';
+        send.textContent = status[i] && status[i].ok ? 'Sent' : 'Send';
+        send.disabled = busy || (status[i] && status[i].ok);
+        send.addEventListener('click', () => sendOne(i, true));
+        actions.append(send);
+      } else {
+        const draft = document.createElement('a');
+        draft.className = 'btn'; draft.textContent = 'Email draft';
+        draft.href = mailtoFor(i);
+        actions.append(draft);
+      }
       li.append(left, actions);
 
       if (peeked.has(i) || showEverything) {
@@ -669,7 +614,6 @@
     });
     $('showAll').textContent = showEverything ? 'Hide all pairings' : 'Show all pairings';
     $('sendAll').disabled = busy;
-    $('ejsTestBtn').disabled = busy;
   }
 
   /* ---------- draw ---------- */
@@ -677,7 +621,7 @@
     const { people: p, problems } = parsePeople($('people').value);
     const drawNote = $('drawNote');
     if (problems.length) { setNote(drawNote, 'Fix the list first:<ul>' + problems.map((x) => `<li>${esc(x)}</li>`).join('') + '</ul>', 'bad'); return; }
-    if (p.length < 3) { setNote(drawNote, 'Add at least 3 people with emails. With only two, the pairing would be a swap.', 'bad'); return; }
+    if (p.length < 3) { setNote(drawNote, 'Add at least 3 people with emails.', 'bad'); return; }
     const ex = parseExclusions($('exclusions').value, p);
     if (ex.problems.length) { setNote(drawNote, ex.problems.map(esc).join('<br>'), 'bad'); return; }
     const result = drawCycle(p.length, ex.forbidden);
@@ -687,6 +631,7 @@
     }
     setNote(drawNote, '');
     people = p; receiver = result; status = {}; peeked = new Set(); showEverything = false;
+    setNote($('sendNote'), '');
 
     const res = $('results');
     res.hidden = false;
@@ -695,7 +640,7 @@
 
     const finish = () => {
       $('shuffle').textContent = '';
-      $('bannerText').textContent = `${people.length} people are paired. Nobody can see who got whom until you peek, show all, or send.`;
+      $('bannerText').textContent = `${people.length} people are paired.`;
       $('banner').hidden = false; $('tagsWrap').hidden = false;
       render();
     };
@@ -716,37 +661,18 @@
     window.scrollTo({ top: $('drawBtn').getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
   });
 
-  /* ---------- copy buttons ---------- */
-  document.querySelectorAll('[data-copy]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const text = btn.getAttribute('data-copy');
-      try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
-      catch (e) { window.prompt('Copy this value:', text); }
-      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
-    });
-  });
-
-  /* ---------- EmailJS ---------- */
-  function ejsConfig() {
-    return { service: $('ejsService').value.trim(), template: $('ejsTemplate').value.trim(), key: $('ejsKey').value.trim() };
-  }
-  function ejsReady() {
-    const c = ejsConfig();
-    return !!(c.service && c.template && c.key);
-  }
+  /* ---------- EmailJS sending ---------- */
   async function postEmailJS(params) {
-    const c = ejsConfig();
-    const org = $('orgName').value.trim();
     try {
       const resp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          service_id: c.service,
-          template_id: c.template,
-          user_id: c.key,
+          service_id: EMAILJS.service,
+          template_id: EMAILJS.template,
+          user_id: EMAILJS.key,
           template_params: Object.assign({
-            from_name: org || eventName(),
+            from_name: $('orgName').value.trim() || eventName(),
             reply_to: $('orgEmail').value.trim()
           }, params)
         })
@@ -759,11 +685,6 @@
   }
 
   async function sendOne(i, single) {
-    if (!ejsReady()) {
-      $('emailjsBox').open = true;
-      setNote($('sendNote'), 'Fill in the Service ID, Template ID and Public key below first.', 'bad');
-      return false;
-    }
     if (single) busy = true;
     status[i] = { ok: false, text: 'Sending…' };
     render();
@@ -782,11 +703,6 @@
   }
 
   $('sendAll').addEventListener('click', async () => {
-    if (!ejsReady()) {
-      $('emailjsBox').open = true;
-      setNote($('sendNote'), 'Set up EmailJS below first, then send all.', 'bad');
-      return;
-    }
     if (!confirm(`Send ${people.length} emails now?`)) return;
     busy = true; render();
     let sent = 0, failed = 0;
@@ -798,29 +714,8 @@
     }
     busy = false; render();
     setNote($('sendNote'), failed
-      ? `${sent} sent, ${failed} failed. Fix the issue and press Send all again to retry only the failed ones.`
+      ? `${sent} sent, ${failed} failed. Press Send all to retry the failed ones.`
       : `All ${sent} emails sent.`, failed ? 'bad' : 'ok');
-  });
-
-  $('ejsTestBtn').addEventListener('click', async () => {
-    const note = $('testNote');
-    const to = $('ejsTest').value.trim();
-    if (!ejsReady()) { setNote(note, 'Fill in the Service ID, Template ID and Public key first.', 'bad'); return; }
-    if (!EMAIL_RE.test(to)) { setNote(note, 'Enter an email address to send the test to.', 'bad'); return; }
-    busy = true; render();
-    setNote(note, 'Sending test…');
-    const r = await postEmailJS({
-      to_name: 'Test Person',
-      to_email: to,
-      giver_name: 'Test Person',
-      receiver_name: 'Sample Receiver',
-      subject: '[TEST] ' + subjectLine(),
-      message: buildMessage('Test Person', 'Sample Receiver')
-    });
-    busy = false; render();
-    setNote(note, r.ok
-      ? 'Test sent. Check the inbox (and spam) to see how it looks.'
-      : 'Not sent: ' + esc(r.error), r.ok ? 'ok' : 'bad');
   });
 })();
 </script>
